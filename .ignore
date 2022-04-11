@@ -1,0 +1,10 @@
+.git
+.idea
+.vscode
+Content
+DerivedDataCache
+Intermediate
+Saved
+Plugins/ALS/Content
+Plugins/ALS/Intermediate
+Plugins/Developer/RiderLink/Intermediate
