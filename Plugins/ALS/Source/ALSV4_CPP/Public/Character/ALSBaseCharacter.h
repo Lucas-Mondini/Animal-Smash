@@ -31,6 +31,9 @@ class ALSV4_CPP_API AALSBaseCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	UPROPERTY(VisibleAnywhere)
+	TArray<UAnimMontage*> ComboAnimation;
+
 public:
 	AALSBaseCharacter(const FObjectInitializer& ObjectInitializer);
 
@@ -40,6 +43,8 @@ public:
 		return MyCharacterMovementComponent;
 	}
 
+	virtual void InitializeComboAnimation();
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void BeginPlay() override;
@@ -47,6 +52,9 @@ public:
 	virtual void PostInitializeComponents() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Input")
+	void AttackAction();
 
 	/** Ragdoll System */
 

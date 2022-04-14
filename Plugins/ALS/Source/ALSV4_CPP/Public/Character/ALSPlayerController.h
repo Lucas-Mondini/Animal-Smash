@@ -20,6 +20,8 @@ class ALSV4_CPP_API AALSPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	AALSPlayerController();
+	
 	virtual void OnPossess(APawn* NewPawn) override;
 
 	virtual void OnRep_Pawn() override;
@@ -108,6 +110,9 @@ protected:
 
 	UFUNCTION()
 	void DebugOverlayMenuCycleAction(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void AttackAction(const FInputActionValue& Value);
 	
 public:
 	/** Main character reference */

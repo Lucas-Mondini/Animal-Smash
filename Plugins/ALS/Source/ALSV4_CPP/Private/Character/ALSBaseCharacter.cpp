@@ -37,6 +37,26 @@ AALSBaseCharacter::AALSBaseCharacter(const FObjectInitializer& ObjectInitializer
 	bUseControllerRotationYaw = 0;
 	bReplicates = true;
 	SetReplicatingMovement(true);
+
+	ConstructorHelpers::FObjectFinder<UDataTable> MovementModelTable(TEXT("DataTable'/ALSV4_CPP/AdvancedLocomotionV4/Data/DataTables/MovementModelTable.MovementModelTable'"));
+	if(MovementModelTable.Succeeded()) {
+		MovementModel.DataTable = MovementModelTable.Object;
+		MovementModel.RowName = FName("Normal");
+		
+	}
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> DefaultMesh(TEXT("SkeletalMesh'/ALSV4_CPP/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/Meshes/AnimMan.AnimMan'"));
+	if(DefaultMesh.Succeeded()) {
+		this->GetMesh()->SetSkeletalMesh(DefaultMesh.Object);
+		this->GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -92), FRotator(0, -90, 0));
+	}
+	ConstructorHelpers::FObjectFinder<UAnimBlueprint> DefaultAnimBP(TEXT("AnimBlueprint'/ALSV4_CPP/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/ALS_AnimBP.ALS_AnimBP'"));
+	if(DefaultAnimBP.Succeeded()) {
+		this->GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		this->GetMesh()->SetAnimInstanceClass(DefaultAnimBP.Object->GeneratedClass);
+	}
+
+	InitializeComboAnimation();
+	
 }
 
 void AALSBaseCharacter::PostInitializeComponents()
@@ -61,6 +81,10 @@ void AALSBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(AALSBaseCharacter, OverlayState, COND_SkipOwner);
 	DOREPLIFETIME_CONDITION(AALSBaseCharacter, ViewMode, COND_SkipOwner);
 	DOREPLIFETIME_CONDITION(AALSBaseCharacter, VisibleMesh, COND_SkipOwner);
+}
+
+void AALSBaseCharacter::AttackAction_Implementation() {
+	Replicated_PlayMontage(ComboAnimation.Last(), 1.0f);
 }
 
 void AALSBaseCharacter::OnBreakfall_Implementation()
@@ -117,6 +141,24 @@ void AALSBaseCharacter::BeginPlay()
 	MyCharacterMovementComponent->SetMovementSettings(GetTargetMovementSettings());
 
 	ALSDebugComponent = FindComponentByClass<UALSDebugComponent>();
+}
+
+void AALSBaseCharacter::InitializeComboAnimation() {
+	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaCutDownKick(TEXT("AnimMontage'/Game/CloseCombatAnimSet/Animations/RootMotion/Attacks/NinjaCutDownKick_Montage.NinjaCutDownKick_Montage'"));
+	if (NinjaCutDownKick.Succeeded()) {
+		ComboAnimation.Add(NinjaCutDownKick.Object);
+	}
+	
+	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaStraightKick(TEXT("AnimMontage'/Game/CloseCombatAnimSet/Animations/RootMotion/Attacks/NinjaStraightKick_Montage.NinjaStraightKick_Montage'"));
+	if (NinjaStraightKick.Succeeded()) {
+		ComboAnimation.Add(NinjaStraightKick.Object);
+	}
+	
+	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaWheelKick(TEXT("AnimMontage'/Game/CloseCombatAnimSet/Animations/RootMotion/Attacks/NinjaWheelKick_Montage.NinjaWheelKick_Montage'"));
+	if (NinjaWheelKick.Succeeded()) {
+		ComboAnimation.Add(NinjaWheelKick.Object);
+	}
+	
 }
 
 void AALSBaseCharacter::Tick(float DeltaTime)
@@ -1343,8 +1385,11 @@ void AALSBaseCharacter::StanceAction_Implementation()
 	if (LastStanceInputTime - PrevStanceInputTime <= RollDoubleTapTimeout)
 	{
 		// Roll
-		Replicated_PlayMontage(GetRollAnimation(), 1.15f);
-
+		if(MovementState != EALSMovementState::InAir)
+		{
+			Replicated_PlayMontage(GetRollAnimation(), 1.15f);
+		}
+		
 		if (Stance == EALSStance::Standing)
 		{
 			SetDesiredStance(EALSStance::Crouching);

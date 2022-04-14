@@ -13,6 +13,20 @@
 #include "Character/ALSPlayerCameraManager.h"
 #include "Components/ALSDebugComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Serialization/FindObjectReferencers.h"
+
+AALSPlayerController::AALSPlayerController() {
+	ConstructorHelpers::FObjectFinder<UInputMappingContext> defaultInputMappingContext(TEXT("InputMappingContext'/ALSV4_CPP/AdvancedLocomotionV4/Blueprints/Input/IMC_Default.IMC_Default'"));
+	if(defaultInputMappingContext.Succeeded())
+		this->DefaultInputMappingContext = defaultInputMappingContext.Object;
+	ConstructorHelpers::FObjectFinder<UInputMappingContext> debugInputMappingContext(TEXT("InputMappingContext'/ALSV4_CPP/AdvancedLocomotionV4/Blueprints/Input/IMC_Debug.IMC_Debug'"));
+	if(debugInputMappingContext.Succeeded())
+		this->DebugInputMappingContext = debugInputMappingContext.Object;
+
+	ConstructorHelpers::FObjectFinder<UBlueprint> playerCameraManagerClass(TEXT("Blueprint'/ALSV4_CPP/AdvancedLocomotionV4/Blueprints/CameraSystem/ALS_PlayerCameraManager.ALS_PlayerCameraManager'"));
+	if(playerCameraManagerClass.Succeeded())
+		this->PlayerCameraManagerClass = playerCameraManagerClass.Object->GeneratedClass;
+}
 
 void AALSPlayerController::OnPossess(APawn* NewPawn)
 {
@@ -220,6 +234,11 @@ void AALSPlayerController::VelocityDirectionAction(const FInputActionValue& Valu
 	{
 		PossessedCharacter->VelocityDirectionAction();
 	}
+}
+
+void AALSPlayerController::AttackAction(const FInputActionValue& Value) {
+	if(PossessedCharacter)
+		PossessedCharacter->AttackAction();
 }
 
 void AALSPlayerController::LookingDirectionAction(const FInputActionValue& Value)
