@@ -84,7 +84,8 @@ void AALSBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 }
 
 void AALSBaseCharacter::AttackAction_Implementation() {
-	Replicated_PlayMontage(ComboAnimation.Last(), 1.0f);
+	UAnimMontage* pMontage = ComboAnimation.Last();
+	Replicated_PlayMontage(pMontage, 0.7f);
 }
 
 void AALSBaseCharacter::OnBreakfall_Implementation()
@@ -144,19 +145,19 @@ void AALSBaseCharacter::BeginPlay()
 }
 
 void AALSBaseCharacter::InitializeComboAnimation() {
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaCutDownKick(TEXT("AnimMontage'/Game/CloseCombatAnimSet/Animations/RootMotion/Attacks/NinjaCutDownKick_Montage.NinjaCutDownKick_Montage'"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaCutDownKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaCutDownKick_Montage_Retargeted.NinjaCutDownKick_Montage_Retargeted'"));
 	if (NinjaCutDownKick.Succeeded()) {
 		ComboAnimation.Add(NinjaCutDownKick.Object);
 	}
 	
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaStraightKick(TEXT("AnimMontage'/Game/CloseCombatAnimSet/Animations/RootMotion/Attacks/NinjaStraightKick_Montage.NinjaStraightKick_Montage'"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaStraightKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaStraightKick_Montage_Retargeted.NinjaStraightKick_Montage_Retargeted'"));
 	if (NinjaStraightKick.Succeeded()) {
-		ComboAnimation.Add(NinjaStraightKick.Object);
+		//ComboAnimation.Add(NinjaStraightKick.Object);
 	}
 	
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaWheelKick(TEXT("AnimMontage'/Game/CloseCombatAnimSet/Animations/RootMotion/Attacks/NinjaWheelKick_Montage.NinjaWheelKick_Montage'"));
+	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaWheelKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaWheelKick_Montage_Retargeted.NinjaWheelKick_Montage_Retargeted'"));
 	if (NinjaWheelKick.Succeeded()) {
-		ComboAnimation.Add(NinjaWheelKick.Object);
+		//ComboAnimation.Add(NinjaWheelKick.Object);
 	}
 	
 }
