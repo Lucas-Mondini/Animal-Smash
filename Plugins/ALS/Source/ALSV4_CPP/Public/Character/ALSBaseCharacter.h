@@ -14,6 +14,7 @@
 #include "ALSBaseCharacter.generated.h"
 
 // forward declarations
+class UActorCombatComponent;
 class UALSDebugComponent;
 class UAnimMontage;
 class UALSPlayerCameraBehavior;
@@ -31,8 +32,9 @@ class ALSV4_CPP_API AALSBaseCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere)
-	TArray<UAnimMontage*> ComboAnimation;
+	UPROPERTY(EditAnywhere)
+	UActorCombatComponent* CombatComponent;
+
 
 public:
 	AALSBaseCharacter(const FObjectInitializer& ObjectInitializer);
@@ -42,8 +44,6 @@ public:
 	{
 		return MyCharacterMovementComponent;
 	}
-
-	virtual void InitializeComboAnimation();
 
 	virtual void Tick(float DeltaTime) override;
 

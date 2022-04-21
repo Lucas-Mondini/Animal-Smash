@@ -17,6 +17,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "Character/ActorComponent/ActorCombatComponent.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -55,8 +56,7 @@ AALSBaseCharacter::AALSBaseCharacter(const FObjectInitializer& ObjectInitializer
 		this->GetMesh()->SetAnimInstanceClass(DefaultAnimBP.Object->GeneratedClass);
 	}
 
-	InitializeComboAnimation();
-	
+	CombatComponent = CreateDefaultSubobject<UActorCombatComponent>(TEXT("Combo Component"));
 }
 
 void AALSBaseCharacter::PostInitializeComponents()
@@ -84,8 +84,7 @@ void AALSBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 }
 
 void AALSBaseCharacter::AttackAction_Implementation() {
-	UAnimMontage* pMontage = ComboAnimation.Last();
-	Replicated_PlayMontage(pMontage, 0.7f);
+	CombatComponent->Attack2();
 }
 
 void AALSBaseCharacter::OnBreakfall_Implementation()
@@ -142,24 +141,6 @@ void AALSBaseCharacter::BeginPlay()
 	MyCharacterMovementComponent->SetMovementSettings(GetTargetMovementSettings());
 
 	ALSDebugComponent = FindComponentByClass<UALSDebugComponent>();
-}
-
-void AALSBaseCharacter::InitializeComboAnimation() {
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaCutDownKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaCutDownKick_Montage_Retargeted.NinjaCutDownKick_Montage_Retargeted'"));
-	if (NinjaCutDownKick.Succeeded()) {
-		ComboAnimation.Add(NinjaCutDownKick.Object);
-	}
-	
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaStraightKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaStraightKick_Montage_Retargeted.NinjaStraightKick_Montage_Retargeted'"));
-	if (NinjaStraightKick.Succeeded()) {
-		//ComboAnimation.Add(NinjaStraightKick.Object);
-	}
-	
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaWheelKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaWheelKick_Montage_Retargeted.NinjaWheelKick_Montage_Retargeted'"));
-	if (NinjaWheelKick.Succeeded()) {
-		//ComboAnimation.Add(NinjaWheelKick.Object);
-	}
-	
 }
 
 void AALSBaseCharacter::Tick(float DeltaTime)
