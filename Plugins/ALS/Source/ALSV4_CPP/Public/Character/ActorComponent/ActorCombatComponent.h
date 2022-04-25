@@ -11,7 +11,8 @@ UENUM(BlueprintType)
 enum class ACCStateMachine : uint8
 {
 	Default,
-	Attacking,
+	Punching,
+	Kicking,
 	Defending,
 	Dodging
 };

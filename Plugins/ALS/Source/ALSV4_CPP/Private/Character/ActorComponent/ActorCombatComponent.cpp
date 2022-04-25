@@ -10,6 +10,25 @@ UActorCombatComponent::UActorCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
+	//Punchs
+	ConstructorHelpers::FObjectFinder<UAnimMontage> Jab_L(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_L_Montage.KB_m_Jab_L_Montage'"));
+	if (Jab_L.Succeeded()) {
+		PunchComboAnimations.Add(Jab_L.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> Jab_R(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_R_Montage.KB_m_Jab_R_Montage'"));
+	if (Jab_R.Succeeded()) {
+		PunchComboAnimations.Add(Jab_R.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> Uppercut_L(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Uppercut_L_Montage.KB_m_Uppercut_L_Montage'"));
+	if (Uppercut_L.Succeeded()) {
+		PunchComboAnimations.Add(Uppercut_L.Object);
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> Superpunch(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_Superpunch_Montage.KB_Superpunch_Montage'"));
+	if (Superpunch.Succeeded()) {
+		PunchComboAnimations.Add(Superpunch.Object);
+	}
+	
+	//Kicks
 	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaCutDownKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaCutDownKick_Retargeted_Montage.NinjaCutDownKick_Retargeted_Montage'"));
 	if (NinjaCutDownKick.Succeeded()) {
 		KickComboAnimations.Add(NinjaCutDownKick.Object);
@@ -34,6 +53,17 @@ UActorCombatComponent::UActorCombatComponent()
 }
 
 void UActorCombatComponent::Attack1() {
+	float animfactor = 0.65;
+	if(OwnerCharacter->GetMovementState() != EALSMovementState::InAir && CanAttack) {
+		CanAttack = false;
+		Attack1ComboLength = PunchComboAnimations.Num();
+		UAnimMontage *anim = PunchComboAnimations[Attack1ComboCount++ % Attack1ComboLength];
+		OwnerCharacter->Replicated_PlayMontage(anim, 1);
+		Attack1ComboAccumulator = 0;
+		AnimAccumulator = 0;
+		AnimTime = anim->GetPlayLength() * animfactor;
+		State = ACCStateMachine::Punching; 
+	}
 }
 
 void UActorCombatComponent::Attack2() {
@@ -46,7 +76,7 @@ void UActorCombatComponent::Attack2() {
 		Attack2ComboAccumulator = 0;
 		AnimAccumulator = 0;
 		AnimTime = anim->GetPlayLength() * animfactor;
-		State = ACCStateMachine::Attacking; 
+		State = ACCStateMachine::Kicking; 
 	}
 }
 

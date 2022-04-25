@@ -236,9 +236,14 @@ void AALSPlayerController::VelocityDirectionAction(const FInputActionValue& Valu
 	}
 }
 
-void AALSPlayerController::AttackAction(const FInputActionValue& Value) {
+void AALSPlayerController::Attack_01_Action(const FInputActionValue& Value) {
 	if(PossessedCharacter)
-		PossessedCharacter->AttackAction();
+		PossessedCharacter->Attack_01_Action();
+}
+
+void AALSPlayerController::Attack_02_Action(const FInputActionValue& Value) {
+	if(PossessedCharacter)
+		PossessedCharacter->Attack_02_Action();
 }
 
 void AALSPlayerController::LookingDirectionAction(const FInputActionValue& Value)

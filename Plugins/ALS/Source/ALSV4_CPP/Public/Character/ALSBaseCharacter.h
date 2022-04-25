@@ -18,6 +18,8 @@ class UActorCombatComponent;
 class UALSDebugComponent;
 class UAnimMontage;
 class UALSPlayerCameraBehavior;
+class UBoxComponent;
+class USphereComponent;
 enum class EVisibilityBasedAnimTickOption : uint8;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FJumpPressedSignature);
@@ -54,7 +56,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Input")
-	void AttackAction();
+	void Attack_01_Action();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Input")
+	void Attack_02_Action();
 
 	/** Ragdoll System */
 
@@ -251,7 +255,7 @@ public:
 	virtual void Replicated_PlayMontage_Implementation(UAnimMontage* Montage, float PlayRate);
 
 	/** Implement on BP to get required roll animation according to character's state */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "ALS|Movement System")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "ALS|Movement System")
 	UAnimMontage* GetRollAnimation();
 
 	/** Utility */
@@ -426,6 +430,28 @@ protected:
 	void OnRep_VisibleMesh(USkeletalMesh* NewVisibleMesh);
 
 protected:
+	
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UCapsuleComponent*> CalvesCollision;
+		
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UBoxComponent*> FootsCollision;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UCapsuleComponent*> ArmsCollision;
+		
+	UPROPERTY(EditDefaultsOnly)
+	TArray<USphereComponent*> HandsCollision;
+
+	UFUNCTION(BlueprintCallable)
+	UCapsuleComponent* CreateCalfCollision(FString calf_side);
+	UFUNCTION(BlueprintCallable)
+	UBoxComponent* CreateFootCollision(FString foot_side, int count);
+	UFUNCTION(BlueprintCallable)
+	USphereComponent* CreateHandCollision(FString hand_side);
+	UFUNCTION(BlueprintCallable)
+	UCapsuleComponent* CreateArmCollision(FString arm_side, int count);
+	
 	/* Custom movement component*/
 	UPROPERTY()
 	TObjectPtr<UALSCharacterMovementComponent> MyCharacterMovementComponent;
@@ -626,6 +652,15 @@ protected:
 	/** We won't use curve based movement and a few other features on networked games */
 	bool bEnableNetworkOptimizations = false;
 
+	UPROPERTY(BlueprintReadWrite, Category="ALS|Roll Animations")
+	UAnimMontage* LandRoll_Default;
+	UPROPERTY(BlueprintReadWrite, Category="ALS|Roll Animations")
+	UAnimMontage* LandRoll_RH;
+	UPROPERTY(BlueprintReadWrite, Category="ALS|Roll Animations")
+	UAnimMontage* LandRoll_LH;
+	UPROPERTY(BlueprintReadWrite, Category="ALS|Roll Animations")
+	UAnimMontage* LandRoll_2H;
+	
 private:
 	UPROPERTY()
 	TObjectPtr<UALSDebugComponent> ALSDebugComponent = nullptr;

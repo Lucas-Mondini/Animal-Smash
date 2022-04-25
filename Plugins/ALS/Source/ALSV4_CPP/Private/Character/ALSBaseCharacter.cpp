@@ -18,6 +18,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "Character/ActorComponent/ActorCombatComponent.h"
+#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -56,6 +58,35 @@ AALSBaseCharacter::AALSBaseCharacter(const FObjectInitializer& ObjectInitializer
 		this->GetMesh()->SetAnimInstanceClass(DefaultAnimBP.Object->GeneratedClass);
 	}
 
+	ConstructorHelpers::FObjectFinder<UAnimMontage> landRoll_Default(TEXT("AnimMontage'/ALSV4_CPP/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_Default.ALS_N_LandRoll_F_Montage_Default'")); 
+	if(landRoll_Default.Succeeded()) {
+		LandRoll_Default = landRoll_Default.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> landRoll_RH(TEXT("AnimMontage'/ALSV4_CPP/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_RH.ALS_N_LandRoll_F_Montage_RH'"));
+	if(landRoll_RH.Succeeded()) {
+		LandRoll_RH = landRoll_RH.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> landRoll_LH(TEXT("AnimMontage'/ALSV4_CPP/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_LH.ALS_N_LandRoll_F_Montage_LH'"));
+	if(landRoll_LH.Succeeded()) {
+		LandRoll_LH = landRoll_LH.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UAnimMontage> landRoll_2H(TEXT("AnimMontage'/ALSV4_CPP/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_2H.ALS_N_LandRoll_F_Montage_2H'"));
+	if(landRoll_2H.Succeeded()) {
+		LandRoll_2H = landRoll_2H.Object;
+	}
+	
+	
+	CalvesCollision.Add(CreateCalfCollision("calf_l"));
+	CalvesCollision.Add(CreateCalfCollision("calf_r"));
+	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 3; j++)
+				FootsCollision.Add(CreateFootCollision( (i ? FString("foot_l") : FString("foot_r")) , j));
+	HandsCollision.Add(CreateHandCollision("hand_l"));
+	HandsCollision.Add(CreateHandCollision("hand_r"));
+	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 2; j++)
+			ArmsCollision.Add(CreateArmCollision( (i ? FString("arm_l") : FString("arm_r")) , j));
+	
 	CombatComponent = CreateDefaultSubobject<UActorCombatComponent>(TEXT("Combo Component"));
 }
 
@@ -83,7 +114,10 @@ void AALSBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(AALSBaseCharacter, VisibleMesh, COND_SkipOwner);
 }
 
-void AALSBaseCharacter::AttackAction_Implementation() {
+void AALSBaseCharacter::Attack_01_Action_Implementation() {
+	CombatComponent->Attack1();
+}
+void AALSBaseCharacter::Attack_02_Action_Implementation() {
 	CombatComponent->Attack2();
 }
 
@@ -101,6 +135,28 @@ void AALSBaseCharacter::Replicated_PlayMontage_Implementation(UAnimMontage* Mont
 	}
 	
 	Server_PlayMontage(Montage, PlayRate);
+}
+
+UAnimMontage* AALSBaseCharacter::GetRollAnimation_Implementation() {
+	switch (OverlayState) {
+	default:
+	case EALSOverlayState::Masculine:
+	case EALSOverlayState::Feminine:
+		return LandRoll_Default;
+	case EALSOverlayState::Injured:
+	case EALSOverlayState::Bow:
+	case EALSOverlayState::Torch:
+	case EALSOverlayState::Barrel:
+		return LandRoll_LH;
+	case EALSOverlayState::PistolOneHanded:
+	case EALSOverlayState::PistolTwoHanded:
+		return LandRoll_RH;
+	case EALSOverlayState::Box:
+	case EALSOverlayState::Binoculars:
+	case EALSOverlayState::HandsTied:
+		return LandRoll_2H;
+		
+	}
 }
 
 void AALSBaseCharacter::BeginPlay()
@@ -1482,4 +1538,184 @@ void AALSBaseCharacter::OnRep_OverlayState(EALSOverlayState PrevOverlayState)
 void AALSBaseCharacter::OnRep_VisibleMesh(USkeletalMesh* NewVisibleMesh)
 {
 	OnVisibleMeshChanged(NewVisibleMesh);
+}
+
+UCapsuleComponent* AALSBaseCharacter::CreateCalfCollision(FString calf_side) {
+	FName CapsuleName(calf_side);
+	FName CapsuleSecondName("_collision");
+	FTransform transform;
+	
+	if(calf_side == "calf_l") {
+		transform.SetLocation(FVector(-21.0, 0, 0));
+	} else {
+		transform.SetLocation(FVector(21.0, 0, 0));
+	}
+	transform.SetRotation(FRotator(90, 0, 0).Quaternion());
+	transform.SetScale3D(FVector(0.4, 0.4, 0.8));
+
+	FName CapsuleObjectName(CapsuleName.ToString() + CapsuleSecondName.ToString());
+	UCapsuleComponent* capsule = CreateDefaultSubobject<UCapsuleComponent>(CapsuleObjectName);
+	capsule->SetRelativeTransform(transform);
+	capsule->SetupAttachment(GetMesh(), CapsuleName);
+	capsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	return capsule;
+}
+
+UBoxComponent* AALSBaseCharacter::CreateFootCollision(FString foot_side, int count) {
+	FName BoxName(foot_side);
+	FName BoxSecondName("_collision");
+	FTransform transform;
+	float P_inX;
+	float R_pitch;
+	float S_inX;
+	
+	float P_inY;
+	float R_yaw;
+	float S_inY;
+	
+	float P_inZ;
+	float R_roll;
+	float S_inZ;
+
+	//set transform values
+	switch(count) {
+	case 0:
+		P_inX = -7.0f;
+		P_inY = 0.65f;
+		P_inZ = 0.0f;
+			
+		R_pitch = 0.0f;
+		R_yaw = 0.0f;
+		R_roll = 0.0f;
+			
+		S_inX = 0.1875f;
+		S_inY = 0.25f;
+		S_inZ = 0.2f;
+			
+		break;
+	case 1:
+		P_inX = -6.7f;
+		P_inY = 10.9f;
+		P_inZ = 0.0f;
+			
+		R_pitch = 0.0f;
+		R_yaw = 30.0f;
+		R_roll = 0.0f;
+			
+		S_inX = 0.09375f;
+		S_inY = 0.25f;
+		S_inZ = 0.2f;
+			
+		break;
+	case 2:
+		P_inX = -10.9f;
+		P_inY = 14.3f;
+		P_inZ = 0.0f;
+			
+		R_pitch = 0.0f;
+		R_yaw = 0.0f;
+		R_roll = 0.0f;
+			
+		S_inX = 0.09f;
+		S_inY = 0.3f;
+		S_inZ = 0.22f;
+			
+		break;
+	default:
+		break;
+	}
+	if(foot_side == "foot_l") {
+		transform.SetLocation(FVector(P_inX, P_inY, P_inZ));
+	} else {
+		transform.SetLocation(FVector(-P_inX, -P_inY, -P_inZ));
+	}
+	transform.SetRotation(FRotator(R_pitch, R_yaw, R_roll).Quaternion());
+	transform.SetScale3D(FVector(S_inX, S_inY, S_inZ));
+	
+	FName BoxObjectName(BoxName.ToString() + BoxSecondName.ToString() + FString("_") +FString::FromInt(count));
+	UBoxComponent* box = CreateDefaultSubobject<UBoxComponent>(BoxObjectName);
+	box->SetRelativeTransform(transform);
+	box->SetupAttachment(GetMesh(), BoxName);
+	box->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	return box;
+}
+
+USphereComponent* AALSBaseCharacter::CreateHandCollision(FString hand_side) {
+	FName SphereName(hand_side);
+	FName SphereSecondName("_collision");
+	FTransform transform;
+	
+	if(hand_side == "hand_l") {
+		transform.SetLocation(FVector(9, -3, -1));
+	} else {
+		transform.SetLocation(FVector(-9, 3, 1));
+	}
+	transform.SetRotation(FRotator(0, 0, 0).Quaternion());
+	transform.SetScale3D(FVector(0.3, 0.3, 0.3));
+
+	FName SphereObjectName(SphereName.ToString() + SphereSecondName.ToString());
+	USphereComponent* sphere = CreateDefaultSubobject<USphereComponent>(SphereObjectName);
+	sphere->SetRelativeTransform(transform);
+	sphere->SetupAttachment(GetMesh(), SphereName);
+	sphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	return sphere;
+}
+
+UCapsuleComponent* AALSBaseCharacter::CreateArmCollision(FString arm_side, int count) {
+	FName CapsuleName(arm_side);
+	FName CapsuleSecondName("_collision");
+	FTransform transform;
+	float P_inX;
+	float R_pitch;
+	float S_inX;
+	
+	float P_inY;
+	float R_yaw;
+	float S_inY;
+	
+	float P_inZ;
+	float R_roll;
+	float S_inZ;
+	
+	P_inX = 14.0f;
+	P_inY = 0.0f;
+	P_inZ = 0.0f;
+
+	R_pitch = 90.0f;
+	R_yaw = 0.0f;
+	R_roll = 0.0f;
+	
+	S_inZ = 0.5f;
+	
+	//set transform values
+	switch(count) {
+	case 0:
+		S_inX = 0.25f;
+		S_inY = 0.25f;
+		break;
+	case 1:
+		S_inX = 0.32f;
+		S_inY = 0.32f;
+		break;
+	default:
+		break;
+	}
+	if(arm_side == "arm_l") {
+		transform.SetLocation(FVector(P_inX, P_inY, P_inZ));
+	} else {
+		transform.SetLocation(FVector(-P_inX, -P_inY, -P_inZ));
+	}
+	transform.SetRotation(FRotator(R_pitch, R_yaw, R_roll).Quaternion());
+	transform.SetScale3D(FVector(S_inX, S_inY, S_inZ));
+	
+	FName before(count? "upper" : "lower");
+	FString attachmentName = FString(before.ToString() + CapsuleName.ToString());
+
+	FName CapsuleObjectName(attachmentName + CapsuleSecondName.ToString() + FString("_") +FString::FromInt(count));
+	UCapsuleComponent* capsule = CreateDefaultSubobject<UCapsuleComponent>(CapsuleObjectName);
+	capsule->SetRelativeTransform(transform);
+	
+	capsule->SetupAttachment(GetMesh(), *attachmentName);
+	capsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	return capsule;
 }

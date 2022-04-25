@@ -112,7 +112,10 @@ protected:
 	void DebugOverlayMenuCycleAction(const FInputActionValue& Value);
 
 	UFUNCTION()
-	void AttackAction(const FInputActionValue& Value);
+	void Attack_01_Action(const FInputActionValue& Value);
+	
+	UFUNCTION()
+	void Attack_02_Action(const FInputActionValue& Value);
 	
 public:
 	/** Main character reference */
