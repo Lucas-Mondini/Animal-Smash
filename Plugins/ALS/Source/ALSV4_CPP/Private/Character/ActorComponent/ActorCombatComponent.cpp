@@ -4,13 +4,32 @@
 #include "Character/ActorComponent/ActorCombatComponent.h"
 
 #include "Character/ALSBaseCharacter.h"
+#include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values for this component's properties
 UActorCombatComponent::UActorCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	
+	State = EACCStateMachine::Default;
+	Cast<AALSBaseCharacter>(GetOwner())->CombatState = State;
 
-	//Punchs
+	for (UBoxComponent* FootCollision : Cast<AALSBaseCharacter>(GetOwner())->GetFootsCollision()) {
+		FootCollision->OnComponentBeginOverlap.AddDynamic(this, &UActorCombatComponent::KickOverlapProcess);
+	}
+	for (UCapsuleComponent* CalfCollision : Cast<AALSBaseCharacter>(GetOwner())->GetCalvesCollision()) {
+		CalfCollision->OnComponentBeginOverlap.AddDynamic(this, &UActorCombatComponent::KickOverlapProcess);
+	}
+	for (USphereComponent* HandCollision : Cast<AALSBaseCharacter>(GetOwner())->GetHandsCollision()) {
+		HandCollision->OnComponentBeginOverlap.AddDynamic(this, &UActorCombatComponent::PunchOverlapProcess);
+	}
+	for (UCapsuleComponent* ArmCollision : Cast<AALSBaseCharacter>(GetOwner())->GetArmsCollision()) {
+		ArmCollision->OnComponentBeginOverlap.AddDynamic(this, &UActorCombatComponent::PunchOverlapProcess);
+	} 
+
+	//Punch animations
 	ConstructorHelpers::FObjectFinder<UAnimMontage> Jab_L(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_L_Montage.KB_m_Jab_L_Montage'"));
 	if (Jab_L.Succeeded()) {
 		PunchComboAnimations.Add(Jab_L.Object);
@@ -28,7 +47,7 @@ UActorCombatComponent::UActorCombatComponent()
 		PunchComboAnimations.Add(Superpunch.Object);
 	}
 	
-	//Kicks
+	//Kick animations
 	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaCutDownKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaCutDownKick_Retargeted_Montage.NinjaCutDownKick_Retargeted_Montage'"));
 	if (NinjaCutDownKick.Succeeded()) {
 		KickComboAnimations.Add(NinjaCutDownKick.Object);
@@ -53,30 +72,28 @@ UActorCombatComponent::UActorCombatComponent()
 }
 
 void UActorCombatComponent::Attack1() {
-	float animfactor = 0.65;
 	if(OwnerCharacter->GetMovementState() != EALSMovementState::InAir && CanAttack) {
 		CanAttack = false;
 		Attack1ComboLength = PunchComboAnimations.Num();
 		UAnimMontage *anim = PunchComboAnimations[Attack1ComboCount++ % Attack1ComboLength];
-		OwnerCharacter->Replicated_PlayMontage(anim, 1);
+		OwnerCharacter->Replicated_PlayMontage(anim, PunchAnimVelocity);
 		Attack1ComboAccumulator = 0;
 		AnimAccumulator = 0;
-		AnimTime = anim->GetPlayLength() * animfactor;
-		State = ACCStateMachine::Punching; 
+		AnimTime = anim->GetPlayLength() * PunchAnimOffsetVelocity;
+		State = EACCStateMachine::Punching; 
 	}
 }
 
 void UActorCombatComponent::Attack2() {
-	float animfactor = 0.8;
 	if(OwnerCharacter->GetMovementState() != EALSMovementState::InAir && CanAttack) {
 		CanAttack = false;
 		Attack2ComboLength = KickComboAnimations.Num();
 		UAnimMontage *anim = KickComboAnimations[Attack2ComboCount++ % Attack2ComboLength];
-		OwnerCharacter->Replicated_PlayMontage(anim, animfactor);
+		OwnerCharacter->Replicated_PlayMontage(anim, KickAnimVelocity);
 		Attack2ComboAccumulator = 0;
 		AnimAccumulator = 0;
-		AnimTime = anim->GetPlayLength() * animfactor;
-		State = ACCStateMachine::Kicking; 
+		AnimTime = anim->GetPlayLength() * KickAnimOffsetVelocity;
+		State = EACCStateMachine::Kicking; 
 	}
 }
 
@@ -88,6 +105,26 @@ void UActorCombatComponent::BeginPlay()
 
 	OwnerCharacter = Cast<AALSBaseCharacter>(GetOwner());
 	
+}
+
+
+void UActorCombatComponent::PunchOverlapProcess(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if(Cast<AActor>(OtherActor) && State == EACCStateMachine::Punching)
+		HitProcess(OtherActor);
+}
+
+void UActorCombatComponent::KickOverlapProcess(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if(Cast<AActor>(OtherActor) && State == EACCStateMachine::Kicking)
+		HitProcess(OtherActor);
+}
+
+void UActorCombatComponent::HitProcess(AActor* OtherActor) {
+	if(!ActorHitted.Contains(OtherActor)) {
+		ActorHitted.Add(OtherActor);
+		
+	}
 }
 
 
@@ -112,7 +149,10 @@ void UActorCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	}
 	
 	if(AnimAccumulator > AnimTime && !CanAttack) {
+		State = EACCStateMachine::Default;
 		CanAttack = true;
 	}
+	//update baseCharacter combat state to the same of the component
+	Cast<AALSBaseCharacter>(GetOwner())->CombatState = State;
 }
 

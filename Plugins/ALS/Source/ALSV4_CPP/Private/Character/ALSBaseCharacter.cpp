@@ -1327,7 +1327,7 @@ void AALSBaseCharacter::JumpAction_Implementation(bool bValue)
 		{
 			if (MovementState == EALSMovementState::Grounded)
 			{
-				if (Stance == EALSStance::Standing)
+				if (Stance == EALSStance::Standing && CombatState == EACCStateMachine::Default)
 				{
 					Jump();
 				}
