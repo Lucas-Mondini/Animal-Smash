@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Library/ALSCharacterEnumLibrary.h"
 #include "ActorCombatComponent.generated.h"
 
-enum EACCStateMachine;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ALSV4_CPP_API UActorCombatComponent : public UActorComponent
@@ -17,6 +17,7 @@ public:
 	// Sets default values for this component's properties
 	UActorCombatComponent();
 
+	UPROPERTY()
 	TArray<AActor*> ActorHitted;
 
 	UPROPERTY(VisibleAnywhere)
@@ -58,6 +59,14 @@ public:
 	
 	FORCEINLINE void setOwnerCharacter(class AALSBaseCharacter* owner) {this->OwnerCharacter = owner;}
 
+	UFUNCTION()
+		void PunchOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+									bool bFromSweep, const FHitResult& SweepResult);
+		void KickOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+									bool bFromSweep, const FHitResult& SweepResult);
+		void HitProcess(AActor* OtherActor);
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -74,14 +83,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	unsigned int Attack2ComboLength;
 
-	UFUNCTION()
-		void PunchOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-									bool bFromSweep, const FHitResult& SweepResult);
-		void KickOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-									bool bFromSweep, const FHitResult& SweepResult);
-		void HitProcess(AActor* OtherActor);
 
 public:	
 	// Called every frame

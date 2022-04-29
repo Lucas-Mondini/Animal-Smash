@@ -41,6 +41,8 @@ AALSBaseCharacter::AALSBaseCharacter(const FObjectInitializer& ObjectInitializer
 	bReplicates = true;
 	SetReplicatingMovement(true);
 
+	CombatComponent = CreateDefaultSubobject<UActorCombatComponent>(TEXT("Combo Component"));
+
 	ConstructorHelpers::FObjectFinder<UDataTable> MovementModelTable(TEXT("DataTable'/ALSV4_CPP/AdvancedLocomotionV4/Data/DataTables/MovementModelTable.MovementModelTable'"));
 	if(MovementModelTable.Succeeded()) {
 		MovementModel.DataTable = MovementModelTable.Object;
@@ -75,19 +77,24 @@ AALSBaseCharacter::AALSBaseCharacter(const FObjectInitializer& ObjectInitializer
 		LandRoll_2H = landRoll_2H.Object;
 	}
 	
-	
-	CalvesCollision.Add(CreateCalfCollision("calf_l"));
-	CalvesCollision.Add(CreateCalfCollision("calf_r"));
-	for (int i = 0; i < 2; i++)
-		for (int j = 0; j < 3; j++)
+	if (CalvesCollision.IsEmpty()) {
+		CalvesCollision.Add(CreateCalfCollision("calf_l"));
+		CalvesCollision.Add(CreateCalfCollision("calf_r"));
+	}
+	if (FootsCollision.IsEmpty()) {
+		for (int i = 0; i < 2; i++)
+			for (int j = 0; j < 3; j++)
 				FootsCollision.Add(CreateFootCollision( (i ? FString("foot_l") : FString("foot_r")) , j));
-	HandsCollision.Add(CreateHandCollision("hand_l"));
-	HandsCollision.Add(CreateHandCollision("hand_r"));
-	for (int i = 0; i < 2; i++)
-		for (int j = 0; j < 2; j++)
-			ArmsCollision.Add(CreateArmCollision( (i ? FString("arm_l") : FString("arm_r")) , j));
-	
-	CombatComponent = CreateDefaultSubobject<UActorCombatComponent>(TEXT("Combo Component"));
+	}
+	if (HandsCollision.IsEmpty()) {
+		HandsCollision.Add(CreateHandCollision("hand_l"));
+		HandsCollision.Add(CreateHandCollision("hand_r"));
+	}
+	if (ArmsCollision.IsEmpty()) {
+		for (int i = 0; i < 2; i++)
+			for (int j = 0; j < 2; j++)
+				ArmsCollision.Add(CreateArmCollision( (i ? FString("arm_l") : FString("arm_r")) , j));
+	}
 }
 
 void AALSBaseCharacter::PostInitializeComponents()
@@ -223,6 +230,9 @@ void AALSBaseCharacter::Tick(float DeltaTime)
 	// Cache values
 	PreviousVelocity = GetVelocity();
 	PreviousAimYaw = AimingRotation.Yaw;
+
+	//Combat State
+	CombatState = CombatComponent->State;
 }
 
 void AALSBaseCharacter::RagdollStart()
@@ -1558,6 +1568,8 @@ UCapsuleComponent* AALSBaseCharacter::CreateCalfCollision(FString calf_side) {
 	capsule->SetRelativeTransform(transform);
 	capsule->SetupAttachment(GetMesh(), CapsuleName);
 	capsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+
+	capsule->OnComponentBeginOverlap.AddDynamic(CombatComponent, &UActorCombatComponent::KickOverlapProcess);
 	return capsule;
 }
 
@@ -1637,6 +1649,8 @@ UBoxComponent* AALSBaseCharacter::CreateFootCollision(FString foot_side, int cou
 	box->SetRelativeTransform(transform);
 	box->SetupAttachment(GetMesh(), BoxName);
 	box->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	
+	box->OnComponentBeginOverlap.AddDynamic(CombatComponent, &UActorCombatComponent::KickOverlapProcess);
 	return box;
 }
 
@@ -1658,6 +1672,8 @@ USphereComponent* AALSBaseCharacter::CreateHandCollision(FString hand_side) {
 	sphere->SetRelativeTransform(transform);
 	sphere->SetupAttachment(GetMesh(), SphereName);
 	sphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+
+	sphere->OnComponentBeginOverlap.AddDynamic(CombatComponent, &UActorCombatComponent::PunchOverlapProcess);
 	return sphere;
 }
 
@@ -1717,5 +1733,7 @@ UCapsuleComponent* AALSBaseCharacter::CreateArmCollision(FString arm_side, int c
 	
 	capsule->SetupAttachment(GetMesh(), *attachmentName);
 	capsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+
+	capsule->OnComponentBeginOverlap.AddDynamic(CombatComponent, &UActorCombatComponent::PunchOverlapProcess);
 	return capsule;
 }

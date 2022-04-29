@@ -361,15 +361,18 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "ALS|Input")
 	void LookingDirectionAction();
+
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UCapsuleComponent*> CalvesCollision;
+		
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UBoxComponent*> FootsCollision;
 	
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE TArray<UCapsuleComponent*> GetCalvesCollision() const {return this->CalvesCollision;}
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE TArray<UBoxComponent*> GetFootsCollision() const {return this->FootsCollision;}
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE TArray<UCapsuleComponent*> GetArmsCollision() const {return this->ArmsCollision;}
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE TArray<USphereComponent*> GetHandsCollision() const {return this->HandsCollision;}
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UCapsuleComponent*> ArmsCollision;
+		
+	UPROPERTY(EditDefaultsOnly)
+	TArray<USphereComponent*> HandsCollision;
 
 protected:
 	/** Ragdoll System */
@@ -445,18 +448,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	int HealthPoints = 100; 
-	
-	UPROPERTY(EditDefaultsOnly)
-	TArray<UCapsuleComponent*> CalvesCollision;
-		
-	UPROPERTY(EditDefaultsOnly)
-	TArray<UBoxComponent*> FootsCollision;
-	
-	UPROPERTY(EditDefaultsOnly)
-	TArray<UCapsuleComponent*> ArmsCollision;
-		
-	UPROPERTY(EditDefaultsOnly)
-	TArray<USphereComponent*> HandsCollision;
 
 	UFUNCTION(BlueprintCallable)
 	UCapsuleComponent* CreateCalfCollision(FString calf_side);

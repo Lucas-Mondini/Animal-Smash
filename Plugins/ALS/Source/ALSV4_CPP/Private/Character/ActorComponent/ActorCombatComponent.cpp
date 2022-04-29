@@ -14,20 +14,6 @@ UActorCombatComponent::UActorCombatComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	
 	State = EACCStateMachine::Default;
-	Cast<AALSBaseCharacter>(GetOwner())->CombatState = State;
-
-	for (UBoxComponent* FootCollision : Cast<AALSBaseCharacter>(GetOwner())->GetFootsCollision()) {
-		FootCollision->OnComponentBeginOverlap.AddDynamic(this, &UActorCombatComponent::KickOverlapProcess);
-	}
-	for (UCapsuleComponent* CalfCollision : Cast<AALSBaseCharacter>(GetOwner())->GetCalvesCollision()) {
-		CalfCollision->OnComponentBeginOverlap.AddDynamic(this, &UActorCombatComponent::KickOverlapProcess);
-	}
-	for (USphereComponent* HandCollision : Cast<AALSBaseCharacter>(GetOwner())->GetHandsCollision()) {
-		HandCollision->OnComponentBeginOverlap.AddDynamic(this, &UActorCombatComponent::PunchOverlapProcess);
-	}
-	for (UCapsuleComponent* ArmCollision : Cast<AALSBaseCharacter>(GetOwner())->GetArmsCollision()) {
-		ArmCollision->OnComponentBeginOverlap.AddDynamic(this, &UActorCombatComponent::PunchOverlapProcess);
-	} 
 
 	//Punch animations
 	ConstructorHelpers::FObjectFinder<UAnimMontage> Jab_L(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_L_Montage.KB_m_Jab_L_Montage'"));
@@ -152,7 +138,5 @@ void UActorCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 		State = EACCStateMachine::Default;
 		CanAttack = true;
 	}
-	//update baseCharacter combat state to the same of the component
-	Cast<AALSBaseCharacter>(GetOwner())->CombatState = State;
 }
 
