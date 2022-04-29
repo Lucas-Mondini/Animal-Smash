@@ -96,20 +96,20 @@ void UActorCombatComponent::BeginPlay()
 
 void UActorCombatComponent::PunchOverlapProcess(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	if(Cast<AActor>(OtherActor) && State == EACCStateMachine::Punching)
+	if(Cast<AActor>(OtherActor) && State == EACCStateMachine::Punching && !ActorHitted.Contains(OtherActor) && OtherActor != GetOwner())
 		HitProcess(OtherActor);
 }
 
 void UActorCombatComponent::KickOverlapProcess(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	if(Cast<AActor>(OtherActor) && State == EACCStateMachine::Kicking)
+	if(Cast<AActor>(OtherActor) && State == EACCStateMachine::Kicking && !ActorHitted.Contains(OtherActor) && OtherActor != GetOwner())
 		HitProcess(OtherActor);
 }
 
 void UActorCombatComponent::HitProcess(AActor* OtherActor) {
 	if(!ActorHitted.Contains(OtherActor)) {
 		ActorHitted.Add(OtherActor);
-		
+		GLog->Log("Hitting " + OtherActor->GetName());
 	}
 }
 
@@ -135,6 +135,8 @@ void UActorCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	}
 	
 	if(AnimAccumulator > AnimTime && !CanAttack) {
+		GLog->Log("esvaziando");
+		ActorHitted.Empty();
 		State = EACCStateMachine::Default;
 		CanAttack = true;
 	}
