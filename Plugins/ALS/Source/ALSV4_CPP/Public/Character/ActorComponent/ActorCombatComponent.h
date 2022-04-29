@@ -4,18 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Library/ALSCharacterEnumLibrary.h"
 #include "ActorCombatComponent.generated.h"
-
-
-UENUM(BlueprintType)
-enum class ACCStateMachine : uint8
-{
-	Default,
-	Punching,
-	Kicking,
-	Defending,
-	Dodging
-};
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -27,8 +17,11 @@ public:
 	// Sets default values for this component's properties
 	UActorCombatComponent();
 
+	UPROPERTY()
+	TArray<AActor*> ActorHitted;
+
 	UPROPERTY(VisibleAnywhere)
-	ACCStateMachine State = ACCStateMachine::Default;
+	EACCStateMachine State;
 
 	UPROPERTY(VisibleAnywhere)
 	bool CanAttack = true;
@@ -44,6 +37,15 @@ public:
 	float AnimTime = 0;
 	UPROPERTY(VisibleAnywhere)
 	float AnimAccumulator = 0;
+	
+	UPROPERTY(EditAnywhere)
+	float KickAnimVelocity = 0.8;
+	UPROPERTY(EditAnywhere)
+	float PunchAnimVelocity = 1;
+	UPROPERTY(EditAnywhere)
+	float KickAnimOffsetVelocity = 0.65;
+	UPROPERTY(EditAnywhere)
+	float PunchAnimOffsetVelocity = 1;
 
 	UPROPERTY(EditAnywhere)
 	TArray<UAnimMontage*> PunchComboAnimations;
@@ -57,6 +59,14 @@ public:
 	
 	FORCEINLINE void setOwnerCharacter(class AALSBaseCharacter* owner) {this->OwnerCharacter = owner;}
 
+	UFUNCTION()
+		void PunchOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+									bool bFromSweep, const FHitResult& SweepResult);
+		void KickOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+									bool bFromSweep, const FHitResult& SweepResult);
+		void HitProcess(AActor* OtherActor);
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -72,6 +82,7 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere)
 	unsigned int Attack2ComboLength;
+
 
 public:	
 	// Called every frame

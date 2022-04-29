@@ -168,3 +168,14 @@ enum class EALSSpawnType : uint8
 	Location,
 	Attached
 };
+
+//Actor Combat Component
+UENUM(BlueprintType)
+enum class EACCStateMachine : uint8
+{
+	Default,
+	Punching,
+	Kicking,
+	Defending,
+	Dodging
+};

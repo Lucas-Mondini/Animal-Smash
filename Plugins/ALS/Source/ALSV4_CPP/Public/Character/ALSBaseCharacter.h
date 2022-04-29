@@ -41,6 +41,9 @@ class ALSV4_CPP_API AALSBaseCharacter : public ACharacter
 public:
 	AALSBaseCharacter(const FObjectInitializer& ObjectInitializer);
 
+	UPROPERTY(VisibleAnywhere)
+	EACCStateMachine CombatState;
+
 	UFUNCTION(BlueprintCallable, Category = "ALS|Movement")
 	FORCEINLINE class UALSCharacterMovementComponent* GetMyMovementComponent() const
 	{
@@ -359,6 +362,18 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "ALS|Input")
 	void LookingDirectionAction();
 
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UCapsuleComponent*> CalvesCollision;
+		
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UBoxComponent*> FootsCollision;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UCapsuleComponent*> ArmsCollision;
+		
+	UPROPERTY(EditDefaultsOnly)
+	TArray<USphereComponent*> HandsCollision;
+
 protected:
 	/** Ragdoll System */
 
@@ -430,18 +445,9 @@ protected:
 	void OnRep_VisibleMesh(USkeletalMesh* NewVisibleMesh);
 
 protected:
-	
-	UPROPERTY(EditDefaultsOnly)
-	TArray<UCapsuleComponent*> CalvesCollision;
-		
-	UPROPERTY(EditDefaultsOnly)
-	TArray<UBoxComponent*> FootsCollision;
-	
-	UPROPERTY(EditDefaultsOnly)
-	TArray<UCapsuleComponent*> ArmsCollision;
-		
-	UPROPERTY(EditDefaultsOnly)
-	TArray<USphereComponent*> HandsCollision;
+
+	UPROPERTY(VisibleAnywhere)
+	int HealthPoints = 100; 
 
 	UFUNCTION(BlueprintCallable)
 	UCapsuleComponent* CreateCalfCollision(FString calf_side);
