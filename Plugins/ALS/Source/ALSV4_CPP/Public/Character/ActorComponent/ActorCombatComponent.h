@@ -16,6 +16,8 @@ class ALSV4_CPP_API UActorCombatComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UActorCombatComponent();
+	
+	class CombatAnimMontage* CombatAnimMontage;
 
 	UPROPERTY()
 	TArray<AActor*> ActorHitted;
