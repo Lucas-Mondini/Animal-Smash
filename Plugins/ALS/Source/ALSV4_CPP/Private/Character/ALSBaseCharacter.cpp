@@ -77,24 +77,24 @@ AALSBaseCharacter::AALSBaseCharacter(const FObjectInitializer& ObjectInitializer
 		LandRoll_2H = landRoll_2H.Object;
 	}
 	
-	if (CalvesCollision.IsEmpty()) {
-		CalvesCollision.Add(CreateCalfCollision("calf_l"));
-		CalvesCollision.Add(CreateCalfCollision("calf_r"));
-	}
-	if (FootsCollision.IsEmpty()) {
-		for (int i = 0; i < 2; i++)
-			for (int j = 0; j < 3; j++)
-				FootsCollision.Add(CreateFootCollision( (i ? FString("foot_l") : FString("foot_r")) , j));
-	}
-	if (HandsCollision.IsEmpty()) {
-		HandsCollision.Add(CreateHandCollision("hand_l"));
-		HandsCollision.Add(CreateHandCollision("hand_r"));
-	}
-	if (ArmsCollision.IsEmpty()) {
-		for (int i = 0; i < 2; i++)
-			for (int j = 0; j < 2; j++)
-				ArmsCollision.Add(CreateArmCollision( (i ? FString("arm_l") : FString("arm_r")) , j));
-	}
+	// if (CalvesCollision.IsEmpty()) {
+	// 	CalvesCollision.Add(CreateCalfCollision("calf_l"));
+	// 	CalvesCollision.Add(CreateCalfCollision("calf_r"));
+	// }
+	// if (FootsCollision.IsEmpty()) {
+	// 	for (int i = 0; i < 2; i++)
+	// 		for (int j = 0; j < 3; j++)
+	// 			FootsCollision.Add(CreateFootCollision( (i ? FString("foot_l") : FString("foot_r")) , j));
+	// }
+	// if (HandsCollision.IsEmpty()) {
+	// 	HandsCollision.Add(CreateHandCollision("hand_l"));
+	// 	HandsCollision.Add(CreateHandCollision("hand_r"));
+	// }
+	// if (ArmsCollision.IsEmpty()) {
+	// 	for (int i = 0; i < 2; i++)
+	// 		for (int j = 0; j < 2; j++)
+	// 			ArmsCollision.Add(CreateArmCollision( (i ? FString("arm_l") : FString("arm_r")) , j));
+	// }
 }
 
 void AALSBaseCharacter::PostInitializeComponents()
