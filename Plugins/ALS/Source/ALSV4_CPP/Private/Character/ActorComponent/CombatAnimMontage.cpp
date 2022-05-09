@@ -8,21 +8,38 @@
 /***
  *@param CollisionStartAndEndTime must have two keys startTime and endTime
  */
-CombatAnimMontage::CombatAnimMontage(const TMap<FString, TArray<UCapsuleComponent*>> SocketNameToCollision, AActor* playerRef, const TCHAR* ObjectToFind, float playRate)
+UCombatAnimMontage::UCombatAnimMontage()
 {
-	ActorToPlayMontage = Cast<AALSBaseCharacter>(playerRef);
+	
+}
+
+UCombatAnimMontage::~UCombatAnimMontage()
+{
+}
+
+UCombatAnimMontage* UCombatAnimMontage::CreateCombatAnimMontage(
+	const TMap<FString, TArray<UCapsuleComponent*>> SocketNameToCollision, AActor* playerRef, const TCHAR* ObjectToFind,
+	float playRate) {
+	UCombatAnimMontage* CombatAnimMontage = NewObject<UCombatAnimMontage>(playerRef);
+	CombatAnimMontage->ActorToPlayMontage = Cast<AALSBaseCharacter>(playerRef);
 	ConstructorHelpers::FObjectFinder<UAnimMontage> anim(ObjectToFind);
 	if (!anim.Succeeded()) {
 		throw std::strcat("CombatAnimMontage-> Animation not found: ", TCHAR_TO_ANSI(ObjectToFind));
 	}
-	AnimMontage = anim.Object;
-	this->PlayRate = playRate;
+	CombatAnimMontage->AnimMontage = anim.Object;
+	CombatAnimMontage->PlayRate = playRate;
+	
+	return CombatAnimMontage;
 }
 
-CombatAnimMontage::~CombatAnimMontage()
-{
+float UCombatAnimMontage::GetPlayLength() {
+	return this->AnimMontage->GetPlayLength();
 }
 
-void CombatAnimMontage::PlayAnimation() {
+void UCombatAnimMontage::PlayAnimation(float playrate) {
+	ActorToPlayMontage->Replicated_PlayMontage(AnimMontage, playrate);
+}
+
+void UCombatAnimMontage::PlayAnimation() {
 	ActorToPlayMontage->Replicated_PlayMontage(AnimMontage, PlayRate);
 }

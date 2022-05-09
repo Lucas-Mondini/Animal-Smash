@@ -4,17 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "Components/CapsuleComponent.h"
+#include "CombatAnimMontage.generated.h"
 
 /**
  * 
  */
-class ALSV4_CPP_API CombatAnimMontage
+UCLASS()
+class ALSV4_CPP_API UCombatAnimMontage : public UObject
 {
-public:
-	CombatAnimMontage(const TMap<FString, TArray<UCapsuleComponent*>> SocketNameToCollision, AActor* playerRef, const TCHAR* ObjectToFind, float playRate);
+	GENERATED_BODY()
 	
-	~CombatAnimMontage();
+public:
+	UCombatAnimMontage();
+	
+	~UCombatAnimMontage();
 
+	static UCombatAnimMontage* CreateCombatAnimMontage(const TMap<FString, TArray<UCapsuleComponent*>> SocketNameToCollision, AActor* playerRef, const TCHAR* ObjectToFind, float playRate);
+
+	float GetPlayLength();
+
+	void PlayAnimation(float playrate);
 	void PlayAnimation();
 protected:
 	UAnimMontage* AnimMontage;

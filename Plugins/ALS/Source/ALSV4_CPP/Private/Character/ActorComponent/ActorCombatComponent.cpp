@@ -4,6 +4,7 @@
 #include "Character/ActorComponent/ActorCombatComponent.h"
 
 #include "Character/ALSBaseCharacter.h"
+#include "Character/ActorComponent/CombatAnimMontage.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
@@ -16,43 +17,31 @@ UActorCombatComponent::UActorCombatComponent()
 	State = EACCStateMachine::Default;
 
 	//Punch animations
-	ConstructorHelpers::FObjectFinder<UAnimMontage> Jab_L(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_L_Montage.KB_m_Jab_L_Montage'"));
-	if (Jab_L.Succeeded()) {
-		PunchComboAnimations.Add(Jab_L.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UAnimMontage> Jab_R(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_R_Montage.KB_m_Jab_R_Montage'"));
-	if (Jab_R.Succeeded()) {
-		PunchComboAnimations.Add(Jab_R.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UAnimMontage> Uppercut_L(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Uppercut_L_Montage.KB_m_Uppercut_L_Montage'"));
-	if (Uppercut_L.Succeeded()) {
-		PunchComboAnimations.Add(Uppercut_L.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UAnimMontage> Superpunch(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_Superpunch_Montage.KB_Superpunch_Montage'"));
-	if (Superpunch.Succeeded()) {
-		PunchComboAnimations.Add(Superpunch.Object);
+	if(GetOwner()) {
+		UCombatAnimMontage* Jab_L = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(),TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_L_Montage.KB_m_Jab_L_Montage'"),PunchAnimVelocity);
+		UCombatAnimMontage* Jab_R = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_R_Montage.KB_m_Jab_R_Montage'"), PunchAnimVelocity);
+		UCombatAnimMontage* Uppercut_L = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Uppercut_L_Montage.KB_m_Uppercut_L_Montage'"), PunchAnimVelocity);
+		UCombatAnimMontage* Superpunch = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_Superpunch_Montage.KB_Superpunch_Montage'"), PunchAnimVelocity);
+	
+		//Kick animations
+		UCombatAnimMontage* NinjaCutDownKick = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaCutDownKick_Retargeted_Montage.NinjaCutDownKick_Retargeted_Montage'"), KickAnimVelocity);
+		UCombatAnimMontage* NinjaLowRightThaiKick = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaLowRightThaiKick_Retargeted_Montage.NinjaLowRightThaiKick_Retargeted_Montage'"), KickAnimVelocity);
+		UCombatAnimMontage* NinjaStraightKick = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaStraightKick_Retargeted_Montage.NinjaStraightKick_Retargeted_Montage'"), KickAnimVelocity);
+		UCombatAnimMontage* NinjaWheelKick = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaWheelKick_Retargeted_Montage.NinjaWheelKick_Retargeted_Montage'"), KickAnimVelocity);
+	
+		PunchComboAnimations.Add(Jab_L);
+		PunchComboAnimations.Add(Jab_R);
+		PunchComboAnimations.Add(Uppercut_L);
+		PunchComboAnimations.Add(Superpunch);
+
+		KickComboAnimations.Add(NinjaCutDownKick);
+		KickComboAnimations.Add(NinjaLowRightThaiKick);
+		KickComboAnimations.Add(NinjaStraightKick);
+		KickComboAnimations.Add(NinjaWheelKick);
 	}
 	
-	//Kick animations
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaCutDownKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaCutDownKick_Retargeted_Montage.NinjaCutDownKick_Retargeted_Montage'"));
-	if (NinjaCutDownKick.Succeeded()) {
-		KickComboAnimations.Add(NinjaCutDownKick.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaLowRightThaiKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaLowRightThaiKick_Retargeted_Montage.NinjaLowRightThaiKick_Retargeted_Montage'"));
-	if (NinjaLowRightThaiKick.Succeeded()) {
-		KickComboAnimations.Add(NinjaLowRightThaiKick.Object);
-	}
 	
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaStraightKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaStraightKick_Retargeted_Montage.NinjaStraightKick_Retargeted_Montage'"));
-	if (NinjaStraightKick.Succeeded()) {
-		KickComboAnimations.Add(NinjaStraightKick.Object);
-	}
-	
-	ConstructorHelpers::FObjectFinder<UAnimMontage> NinjaWheelKick(TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaWheelKick_Retargeted_Montage.NinjaWheelKick_Retargeted_Montage'"));
-	if (NinjaWheelKick.Succeeded()) {
-		KickComboAnimations.Add(NinjaWheelKick.Object);
-	}
-	
+	Attack2ComboLength = PunchComboAnimations.Num();
 	Attack2ComboLength = KickComboAnimations.Num();
 	
 }
@@ -61,8 +50,8 @@ void UActorCombatComponent::Attack1() {
 	if(OwnerCharacter->GetMovementState() != EALSMovementState::InAir && CanAttack) {
 		CanAttack = false;
 		Attack1ComboLength = PunchComboAnimations.Num();
-		UAnimMontage *anim = PunchComboAnimations[Attack1ComboCount++ % Attack1ComboLength];
-		OwnerCharacter->Replicated_PlayMontage(anim, PunchAnimVelocity);
+		UCombatAnimMontage *anim = PunchComboAnimations[Attack1ComboCount++ % Attack1ComboLength];
+		anim->PlayAnimation();
 		Attack1ComboAccumulator = 0;
 		AnimAccumulator = 0;
 		AnimTime = anim->GetPlayLength() * PunchAnimOffsetVelocity;
@@ -74,8 +63,8 @@ void UActorCombatComponent::Attack2() {
 	if(OwnerCharacter->GetMovementState() != EALSMovementState::InAir && CanAttack) {
 		CanAttack = false;
 		Attack2ComboLength = KickComboAnimations.Num();
-		UAnimMontage *anim = KickComboAnimations[Attack2ComboCount++ % Attack2ComboLength];
-		OwnerCharacter->Replicated_PlayMontage(anim, KickAnimVelocity);
+		UCombatAnimMontage *anim = KickComboAnimations[Attack2ComboCount++ % Attack2ComboLength];
+		anim->PlayAnimation();
 		Attack2ComboAccumulator = 0;
 		AnimAccumulator = 0;
 		AnimTime = anim->GetPlayLength() * KickAnimOffsetVelocity;
