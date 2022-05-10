@@ -41,6 +41,23 @@ class ALSV4_CPP_API AALSBaseCharacter : public ACharacter
 public:
 	AALSBaseCharacter(const FObjectInitializer& ObjectInitializer);
 
+	/***
+	* @param side n 0->both\n 1->left only\n 2->right only
+	*/
+	virtual TMap<FString, TArray<FTransform>> CreateCalfTransformMap(int side = 0);
+	/***
+	* @param side n 0->both\n 1->left only\n 2->right only
+	*/
+	virtual TMap<FString, TArray<FTransform>> CreateFootTransformMap(int side = 0);
+	/***
+	* @param side n 0->both\n 1->left only\n 2->right only
+	*/
+	virtual TMap<FString, TArray<FTransform>> CreateHandTransformMap(int side = 0);
+	/***
+	* @param side n 0->both\n 1->left only\n 2->right only
+	*/
+	virtual TMap<FString, TArray<FTransform>> CreateArmTransformMap(int side = 0);
+
 	UPROPERTY(VisibleAnywhere)
 	EACCStateMachine CombatState;
 
@@ -62,6 +79,9 @@ public:
 	void Attack_01_Action();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Input")
 	void Attack_02_Action();
+
+	UFUNCTION(BlueprintCallable)
+	UActorCombatComponent* GetCombatComponent();
 
 	/** Ragdoll System */
 
@@ -448,15 +468,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	int HealthPoints = 100; 
-
-	UFUNCTION(BlueprintCallable)
-	UCapsuleComponent* CreateCalfCollision(FString calf_side);
-	UFUNCTION(BlueprintCallable)
-	UBoxComponent* CreateFootCollision(FString foot_side, int count);
-	UFUNCTION(BlueprintCallable)
-	USphereComponent* CreateHandCollision(FString hand_side);
-	UFUNCTION(BlueprintCallable)
-	UCapsuleComponent* CreateArmCollision(FString arm_side, int count);
 	
 	/* Custom movement component*/
 	UPROPERTY()

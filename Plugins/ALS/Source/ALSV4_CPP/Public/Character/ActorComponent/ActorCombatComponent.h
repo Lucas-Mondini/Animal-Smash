@@ -8,6 +8,7 @@
 #include "ActorCombatComponent.generated.h"
 
 
+class UCombatAnimMontage;
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ALSV4_CPP_API UActorCombatComponent : public UActorComponent
 {
@@ -16,7 +17,7 @@ class ALSV4_CPP_API UActorCombatComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UActorCombatComponent();
-
+	
 	UPROPERTY()
 	TArray<AActor*> ActorHitted;
 
@@ -45,12 +46,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	float KickAnimOffsetVelocity = 0.65;
 	UPROPERTY(EditAnywhere)
-	float PunchAnimOffsetVelocity = 1;
-
-	UPROPERTY(EditAnywhere)
-	TArray<UAnimMontage*> PunchComboAnimations;
-	UPROPERTY(EditAnywhere)
-	TArray<UAnimMontage*> KickComboAnimations;
+	float PunchAnimOffsetVelocity = 0.7;
+	
+	UPROPERTY(EditAnywhere, Instanced)
+	TArray<UCombatAnimMontage*> PunchComboAnimations;
+	UPROPERTY(EditAnywhere, Instanced)
+	TArray<UCombatAnimMontage*> KickComboAnimations;
 
 	UFUNCTION(BlueprintCallable)
 	void Attack1();
@@ -60,12 +61,9 @@ public:
 	FORCEINLINE void setOwnerCharacter(class AALSBaseCharacter* owner) {this->OwnerCharacter = owner;}
 
 	UFUNCTION()
-		void PunchOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-									bool bFromSweep, const FHitResult& SweepResult);
-		void KickOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-									bool bFromSweep, const FHitResult& SweepResult);
+		void CombatComponentProcessOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+														UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+														bool bFromSweep, const FHitResult& SweepResult);
 		void HitProcess(AActor* OtherActor);
 protected:
 	// Called when the game starts
