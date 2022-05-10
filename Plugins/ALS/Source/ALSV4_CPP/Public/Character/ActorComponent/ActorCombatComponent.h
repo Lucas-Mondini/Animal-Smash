@@ -17,7 +17,7 @@ class ALSV4_CPP_API UActorCombatComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UActorCombatComponent();
-
+	
 	UPROPERTY()
 	TArray<AActor*> ActorHitted;
 
@@ -61,12 +61,9 @@ public:
 	FORCEINLINE void setOwnerCharacter(class AALSBaseCharacter* owner) {this->OwnerCharacter = owner;}
 
 	UFUNCTION()
-		void PunchOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-									bool bFromSweep, const FHitResult& SweepResult);
-		void KickOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-									bool bFromSweep, const FHitResult& SweepResult);
+		void CombatComponentProcessOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+														UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+														bool bFromSweep, const FHitResult& SweepResult);
 		void HitProcess(AActor* OtherActor);
 protected:
 	// Called when the game starts

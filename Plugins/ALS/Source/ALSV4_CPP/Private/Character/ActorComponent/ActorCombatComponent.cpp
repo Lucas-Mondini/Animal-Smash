@@ -5,9 +5,7 @@
 
 #include "Character/ALSBaseCharacter.h"
 #include "Character/ActorComponent/CombatAnimMontage.h"
-#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/SphereComponent.h"
 
 // Sets default values for this component's properties
 UActorCombatComponent::UActorCombatComponent()
@@ -18,26 +16,20 @@ UActorCombatComponent::UActorCombatComponent()
 
 	//Punch animations
 	if(GetOwner()) {
-		UCombatAnimMontage* Jab_L = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(),TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_L_Montage.KB_m_Jab_L_Montage'"),PunchAnimVelocity);
-		UCombatAnimMontage* Jab_R = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_R_Montage.KB_m_Jab_R_Montage'"), PunchAnimVelocity);
-		UCombatAnimMontage* Uppercut_L = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Uppercut_L_Montage.KB_m_Uppercut_L_Montage'"), PunchAnimVelocity);
-		UCombatAnimMontage* Superpunch = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_Superpunch_Montage.KB_Superpunch_Montage'"), PunchAnimVelocity);
+		PunchComboAnimations.Add(UCombatAnimMontage::CreateCombatAnimMontage(Cast<AALSBaseCharacter>(GetOwner())->CreateHandTransformMap(1), GetOwner(),TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_L_Montage.KB_m_Jab_L_Montage'"),PunchAnimVelocity));
+		PunchComboAnimations.Add(UCombatAnimMontage::CreateCombatAnimMontage(Cast<AALSBaseCharacter>(GetOwner())->CreateHandTransformMap(2), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Jab_R_Montage.KB_m_Jab_R_Montage'"), PunchAnimVelocity));
+		PunchComboAnimations.Add(UCombatAnimMontage::CreateCombatAnimMontage(Cast<AALSBaseCharacter>(GetOwner())->CreateHandTransformMap(1), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_m_Uppercut_L_Montage.KB_m_Uppercut_L_Montage'"), PunchAnimVelocity));
+		PunchComboAnimations.Add(UCombatAnimMontage::CreateCombatAnimMontage(Cast<AALSBaseCharacter>(GetOwner())->CreateHandTransformMap(2), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/KB_Superpunch_Montage.KB_Superpunch_Montage'"), PunchAnimVelocity));
 	
+		TMap<FString, TArray<FTransform>> CalfAndFoot;
+		CalfAndFoot.Append(Cast<AALSBaseCharacter>(GetOwner())->CreateCalfTransformMap(2));
+		CalfAndFoot.Append(Cast<AALSBaseCharacter>(GetOwner())->CreateFootTransformMap(2));
 		//Kick animations
-		UCombatAnimMontage* NinjaCutDownKick = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaCutDownKick_Retargeted_Montage.NinjaCutDownKick_Retargeted_Montage'"), KickAnimVelocity);
-		UCombatAnimMontage* NinjaLowRightThaiKick = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaLowRightThaiKick_Retargeted_Montage.NinjaLowRightThaiKick_Retargeted_Montage'"), KickAnimVelocity);
-		UCombatAnimMontage* NinjaStraightKick = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaStraightKick_Retargeted_Montage.NinjaStraightKick_Retargeted_Montage'"), KickAnimVelocity);
-		UCombatAnimMontage* NinjaWheelKick = UCombatAnimMontage::CreateCombatAnimMontage(TMap<FString, TArray<UCapsuleComponent*>>(), GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaWheelKick_Retargeted_Montage.NinjaWheelKick_Retargeted_Montage'"), KickAnimVelocity);
-	
-		PunchComboAnimations.Add(Jab_L);
-		PunchComboAnimations.Add(Jab_R);
-		PunchComboAnimations.Add(Uppercut_L);
-		PunchComboAnimations.Add(Superpunch);
-
-		KickComboAnimations.Add(NinjaCutDownKick);
-		KickComboAnimations.Add(NinjaLowRightThaiKick);
-		KickComboAnimations.Add(NinjaStraightKick);
-		KickComboAnimations.Add(NinjaWheelKick);
+		KickComboAnimations.Add(UCombatAnimMontage::CreateCombatAnimMontage(CalfAndFoot, GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaCutDownKick_Retargeted_Montage.NinjaCutDownKick_Retargeted_Montage'"), KickAnimVelocity));
+		KickComboAnimations.Add(UCombatAnimMontage::CreateCombatAnimMontage(CalfAndFoot, GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaLowRightThaiKick_Retargeted_Montage.NinjaLowRightThaiKick_Retargeted_Montage'"), KickAnimVelocity));
+		KickComboAnimations.Add(UCombatAnimMontage::CreateCombatAnimMontage(CalfAndFoot, GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaStraightKick_Retargeted_Montage.NinjaStraightKick_Retargeted_Montage'"), KickAnimVelocity));
+		KickComboAnimations.Add(UCombatAnimMontage::CreateCombatAnimMontage(CalfAndFoot, GetOwner(), TEXT("AnimMontage'/Game/AnimalSmash/Assets/Anim/NinjaWheelKick_Retargeted_Montage.NinjaWheelKick_Retargeted_Montage'"), KickAnimVelocity));
+		
 	}
 	
 	
@@ -83,22 +75,16 @@ void UActorCombatComponent::BeginPlay()
 }
 
 
-void UActorCombatComponent::PunchOverlapProcess(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+void UActorCombatComponent::CombatComponentProcessOverlapProcess(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	if(Cast<AActor>(OtherActor) && State == EACCStateMachine::Punching && !ActorHitted.Contains(OtherActor) && OtherActor != GetOwner())
-		HitProcess(OtherActor);
-}
-
-void UActorCombatComponent::KickOverlapProcess(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	if(Cast<AActor>(OtherActor) && State == EACCStateMachine::Kicking && !ActorHitted.Contains(OtherActor) && OtherActor != GetOwner())
+	if(Cast<AActor>(OtherActor) && !ActorHitted.Contains(OtherActor) && OtherActor != GetOwner())
 		HitProcess(OtherActor);
 }
 
 void UActorCombatComponent::HitProcess(AActor* OtherActor) {
 	if(!ActorHitted.Contains(OtherActor)) {
 		ActorHitted.Add(OtherActor);
-		GLog->Log("Hitting " + OtherActor->GetName());
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, "Hitting " + OtherActor->GetName());
 	}
 }
 
@@ -130,4 +116,3 @@ void UActorCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 		CanAttack = true;
 	}
 }
-

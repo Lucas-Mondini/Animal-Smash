@@ -19,7 +19,6 @@
 #include "TimerManager.h"
 #include "Character/ActorComponent/ActorCombatComponent.h"
 #include "Components/BoxComponent.h"
-#include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -233,6 +232,10 @@ void AALSBaseCharacter::Tick(float DeltaTime)
 
 	//Combat State
 	CombatState = CombatComponent->State;
+}
+
+UActorCombatComponent* AALSBaseCharacter::GetCombatComponent() {
+	return this->CombatComponent;
 }
 
 void AALSBaseCharacter::RagdollStart()
@@ -1550,190 +1553,221 @@ void AALSBaseCharacter::OnRep_VisibleMesh(USkeletalMesh* NewVisibleMesh)
 	OnVisibleMeshChanged(NewVisibleMesh);
 }
 
-UCapsuleComponent* AALSBaseCharacter::CreateCalfCollision(FString calf_side) {
-	FName CapsuleName(calf_side);
-	FName CapsuleSecondName("_collision");
-	FTransform transform;
-	
-	if(calf_side == "calf_l") {
-		transform.SetLocation(FVector(-21.0, 0, 0));
-	} else {
-		transform.SetLocation(FVector(21.0, 0, 0));
+
+TMap<FString, TArray<FTransform>> AALSBaseCharacter::CreateCalfTransformMap(int side) {
+
+	TMap<FString, TArray<FTransform>> map;
+	switch (side) {
+		case 1:
+			map.Add(FString("calf_l"));
+			break;
+		case 2:
+			map.Add(FString("calf_r"));
+			break;
+		case 0:
+		default:
+			map.Add(FString("calf_l"));
+			map.Add(FString("calf_r"));
+			break;
 	}
-	transform.SetRotation(FRotator(90, 0, 0).Quaternion());
-	transform.SetScale3D(FVector(0.4, 0.4, 0.8));
 
-	FName CapsuleObjectName(CapsuleName.ToString() + CapsuleSecondName.ToString());
-	UCapsuleComponent* capsule = CreateDefaultSubobject<UCapsuleComponent>(CapsuleObjectName);
-	capsule->SetRelativeTransform(transform);
-	capsule->SetupAttachment(GetMesh(), CapsuleName);
-	capsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	for (auto &i : map) {
+		FTransform transform;
+		
+		if(i.Key == "calf_l") {
+			transform.SetLocation(FVector(-21.0, 0, 0));
+		} else {
+			transform.SetLocation(FVector(21.0, 0, 0));
+		}
+		transform.SetRotation(FRotator(90, 0, 0).Quaternion());
+		transform.SetScale3D(FVector(0.4, 0.4, 0.8));
 
-	capsule->OnComponentBeginOverlap.AddDynamic(CombatComponent, &UActorCombatComponent::KickOverlapProcess);
-	return capsule;
+		i.Value.Add(transform);
+		
+	}
+	
+	return map;
 }
 
-UBoxComponent* AALSBaseCharacter::CreateFootCollision(FString foot_side, int count) {
-	FName BoxName(foot_side);
-	FName BoxSecondName("_collision");
-	FTransform transform;
-	float P_inX;
-	float R_pitch;
-	float S_inX;
-	
-	float P_inY;
-	float R_yaw;
-	float S_inY;
-	
-	float P_inZ;
-	float R_roll;
-	float S_inZ;
+TMap<FString, TArray<FTransform>> AALSBaseCharacter::CreateFootTransformMap(int side) {
+	TMap<FString, TArray<FTransform>> map;
+	switch (side) {
+		case 1:
+			map.Add(FString("foot_l"));
+			break;
+		case 2:
+			map.Add(FString("foot_r"));
+			break;
+		case 0:
+		default:
+			map.Add(FString("foot_l"));
+			map.Add(FString("foot_r"));
+			break;
+	}
 
-	//set transform values
-	switch(count) {
-	case 0:
-		P_inX = -7.0f;
-		P_inY = 0.65f;
+	for (auto &i : map) {
+		FTransform transform;
+		for (int count = 0; count < 3; count++) {
+			float P_inX;
+			float R_pitch;
+			float S_inX;
+		
+			float P_inY;
+			float R_yaw;
+			float S_inY;
+		
+			float P_inZ;
+			float R_roll;
+			float S_inZ;
+
+			//set transform values
+			switch(count) {
+			case 0:
+				P_inX = -7.0f;
+				P_inY = 0.65f;
+				P_inZ = 0.0f;
+				
+				R_pitch = 0.0f;
+				R_yaw = 0.0f;
+				R_roll = 0.0f;
+				
+				S_inX = 0.1875f;
+				S_inY = 0.25f;
+				S_inZ = 0.2f;
+				
+				break;
+			case 1:
+				P_inX = -6.7f;
+				P_inY = 10.9f;
+				P_inZ = 0.0f;
+				
+				R_pitch = 0.0f;
+				R_yaw = 30.0f;
+				R_roll = 0.0f;
+				
+				S_inX = 0.09375f;
+				S_inY = 0.25f;
+				S_inZ = 0.2f;
+				
+				break;
+			case 2:
+				P_inX = -10.9f;
+				P_inY = 14.3f;
+				P_inZ = 0.0f;
+				
+				R_pitch = 0.0f;
+				R_yaw = 0.0f;
+				R_roll = 0.0f;
+				
+				S_inX = 0.09f;
+				S_inY = 0.3f;
+				S_inZ = 0.22f;
+				
+				break;
+			default:
+				break;
+			}
+			if(i.Key == "foot_l") {
+				transform.SetLocation(FVector(P_inX, P_inY, P_inZ));
+			} else {
+				transform.SetLocation(FVector(-P_inX, -P_inY, -P_inZ));
+			}
+			transform.SetRotation(FRotator(R_pitch, R_yaw, R_roll).Quaternion());
+			transform.SetScale3D(FVector(S_inX, S_inY, S_inZ));
+			i.Value.Add(transform);
+		}
+	}
+	//box->SetupAttachment(GetMesh(), BoxName);
+	//box->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	
+	return map;
+}
+
+TMap<FString, TArray<FTransform>> AALSBaseCharacter::CreateHandTransformMap(int side) {
+	TMap<FString, TArray<FTransform>> map;
+	switch (side) {
+		case 1:
+			map.Add(FString("hand_l"));
+			break;
+		case 2:
+			map.Add(FString("hand_r"));
+			break;
+		case 0:
+		default:
+			map.Add(FString("hand_l"));
+			map.Add(FString("hand_r"));
+			break;
+	}
+
+	for (auto &i : map) {
+		FTransform transform;
+	
+		if(i.Key == "hand_l") {
+			transform.SetLocation(FVector(9, -3, -1));
+		} else {
+			transform.SetLocation(FVector(-9, 3, 1));
+		}
+		transform.SetRotation(FRotator(0, 0, 0).Quaternion());
+		transform.SetScale3D(FVector(0.3, 0.3, 0.3));
+
+		i.Value.Add(transform);
+	}
+	
+	return map;
+}
+
+TMap<FString, TArray<FTransform>> AALSBaseCharacter::CreateArmTransformMap(int side) {
+	TMap<FString, TArray<FTransform>> map;
+	switch (side) {
+		case 1:
+			map.Add(FString("arm_l"));
+			break;
+		case 2:
+			map.Add(FString("arm_r"));
+			break;
+		case 0:
+		default:
+			map.Add(FString("arm_l"));
+			map.Add(FString("arm_r"));
+			break;
+	}
+
+	for (auto &i : map) {
+		FTransform transform;
+		float P_inX;
+		float R_pitch;
+		float S_inX;
+
+		float P_inY;
+		float R_yaw;
+		float S_inY;
+
+		float P_inZ;
+		float R_roll;
+		float S_inZ;
+
+		P_inX = 14.0f;
+		P_inY = 0.0f;
 		P_inZ = 0.0f;
-			
-		R_pitch = 0.0f;
+
+		R_pitch = 90.0f;
 		R_yaw = 0.0f;
 		R_roll = 0.0f;
-			
-		S_inX = 0.1875f;
-		S_inY = 0.25f;
-		S_inZ = 0.2f;
-			
-		break;
-	case 1:
-		P_inX = -6.7f;
-		P_inY = 10.9f;
-		P_inZ = 0.0f;
-			
-		R_pitch = 0.0f;
-		R_yaw = 30.0f;
-		R_roll = 0.0f;
-			
-		S_inX = 0.09375f;
-		S_inY = 0.25f;
-		S_inZ = 0.2f;
-			
-		break;
-	case 2:
-		P_inX = -10.9f;
-		P_inY = 14.3f;
-		P_inZ = 0.0f;
-			
-		R_pitch = 0.0f;
-		R_yaw = 0.0f;
-		R_roll = 0.0f;
-			
-		S_inX = 0.09f;
-		S_inY = 0.3f;
-		S_inZ = 0.22f;
-			
-		break;
-	default:
-		break;
-	}
-	if(foot_side == "foot_l") {
-		transform.SetLocation(FVector(P_inX, P_inY, P_inZ));
-	} else {
-		transform.SetLocation(FVector(-P_inX, -P_inY, -P_inZ));
-	}
-	transform.SetRotation(FRotator(R_pitch, R_yaw, R_roll).Quaternion());
-	transform.SetScale3D(FVector(S_inX, S_inY, S_inZ));
-	
-	FName BoxObjectName(BoxName.ToString() + BoxSecondName.ToString() + FString("_") +FString::FromInt(count));
-	UBoxComponent* box = CreateDefaultSubobject<UBoxComponent>(BoxObjectName);
-	box->SetRelativeTransform(transform);
-	box->SetupAttachment(GetMesh(), BoxName);
-	box->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	
-	box->OnComponentBeginOverlap.AddDynamic(CombatComponent, &UActorCombatComponent::KickOverlapProcess);
-	return box;
-}
 
-USphereComponent* AALSBaseCharacter::CreateHandCollision(FString hand_side) {
-	FName SphereName(hand_side);
-	FName SphereSecondName("_collision");
-	FTransform transform;
-	
-	if(hand_side == "hand_l") {
-		transform.SetLocation(FVector(9, -3, -1));
-	} else {
-		transform.SetLocation(FVector(-9, 3, 1));
-	}
-	transform.SetRotation(FRotator(0, 0, 0).Quaternion());
-	transform.SetScale3D(FVector(0.3, 0.3, 0.3));
-
-	FName SphereObjectName(SphereName.ToString() + SphereSecondName.ToString());
-	USphereComponent* sphere = CreateDefaultSubobject<USphereComponent>(SphereObjectName);
-	sphere->SetRelativeTransform(transform);
-	sphere->SetupAttachment(GetMesh(), SphereName);
-	sphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-
-	sphere->OnComponentBeginOverlap.AddDynamic(CombatComponent, &UActorCombatComponent::PunchOverlapProcess);
-	return sphere;
-}
-
-UCapsuleComponent* AALSBaseCharacter::CreateArmCollision(FString arm_side, int count) {
-	FName CapsuleName(arm_side);
-	FName CapsuleSecondName("_collision");
-	FTransform transform;
-	float P_inX;
-	float R_pitch;
-	float S_inX;
-	
-	float P_inY;
-	float R_yaw;
-	float S_inY;
-	
-	float P_inZ;
-	float R_roll;
-	float S_inZ;
-	
-	P_inX = 14.0f;
-	P_inY = 0.0f;
-	P_inZ = 0.0f;
-
-	R_pitch = 90.0f;
-	R_yaw = 0.0f;
-	R_roll = 0.0f;
-	
-	S_inZ = 0.5f;
-	
-	//set transform values
-	switch(count) {
-	case 0:
+		S_inZ = 0.5f;
 		S_inX = 0.25f;
 		S_inY = 0.25f;
-		break;
-	case 1:
-		S_inX = 0.32f;
-		S_inY = 0.32f;
-		break;
-	default:
-		break;
+		if(i.Key == "arm_l") {
+			transform.SetLocation(FVector(P_inX, P_inY, P_inZ));
+		} else {
+			transform.SetLocation(FVector(-P_inX, -P_inY, -P_inZ));
+		}
+		transform.SetRotation(FRotator(R_pitch, R_yaw, R_roll).Quaternion());
+		transform.SetScale3D(FVector(S_inX, S_inY, S_inZ));
+		i.Value.Add(transform);
 	}
-	if(arm_side == "arm_l") {
-		transform.SetLocation(FVector(P_inX, P_inY, P_inZ));
-	} else {
-		transform.SetLocation(FVector(-P_inX, -P_inY, -P_inZ));
-	}
-	transform.SetRotation(FRotator(R_pitch, R_yaw, R_roll).Quaternion());
-	transform.SetScale3D(FVector(S_inX, S_inY, S_inZ));
+	//box->SetupAttachment(GetMesh(), BoxName);
+	//box->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	
-	FName before(count? "upper" : "lower");
-	FString attachmentName = FString(before.ToString() + CapsuleName.ToString());
-
-	FName CapsuleObjectName(attachmentName + CapsuleSecondName.ToString() + FString("_") +FString::FromInt(count));
-	UCapsuleComponent* capsule = CreateDefaultSubobject<UCapsuleComponent>(CapsuleObjectName);
-	capsule->SetRelativeTransform(transform);
-	
-	capsule->SetupAttachment(GetMesh(), *attachmentName);
-	capsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-
-	capsule->OnComponentBeginOverlap.AddDynamic(CombatComponent, &UActorCombatComponent::PunchOverlapProcess);
-	return capsule;
+	return map;
 }

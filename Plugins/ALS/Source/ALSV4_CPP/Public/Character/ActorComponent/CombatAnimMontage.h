@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/CapsuleComponent.h"
 #include "CombatAnimMontage.generated.h"
 
 /**
  * 
  */
+class UCapsuleComponent;
 UCLASS()
 class ALSV4_CPP_API UCombatAnimMontage : public UObject
 {
@@ -16,19 +16,30 @@ class ALSV4_CPP_API UCombatAnimMontage : public UObject
 	
 public:
 	UCombatAnimMontage();
+	static UCombatAnimMontage* CreateCombatAnimMontage(const TMap<FString, TArray<FTransform>> SocketNameToCollision, AActor* playerRef, const TCHAR* ObjectToFind, float playRate);
 	
 	~UCombatAnimMontage();
 
-	static UCombatAnimMontage* CreateCombatAnimMontage(const TMap<FString, TArray<UCapsuleComponent*>> SocketNameToCollision, AActor* playerRef, const TCHAR* ObjectToFind, float playRate);
+
+	void CreateAnimCollisions();
+	void DestroyAnimCollisions();
+	
+	UFUNCTION()
+	void CallCombatComponentProcessOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+													UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+													bool bFromSweep, const FHitResult& SweepResult);
 
 	float GetPlayLength();
-
 	void PlayAnimation(float playrate);
 	void PlayAnimation();
-protected:
-	UAnimMontage* AnimMontage;
-	class AALSBaseCharacter* ActorToPlayMontage;
-	float PlayRate;
 	
+	UPROPERTY(VisibleAnywhere)
+	UAnimMontage* AnimMontage;
+	UPROPERTY(VisibleAnywhere)
+	class AALSBaseCharacter* ActorToPlayMontage;
+protected:
+	float PlayRate;
+	TMap<FString, TArray<FTransform>> SocketNameToCollision;
+	TArray<UCapsuleComponent*> CollisionCapsuleArray;
 	
 };
