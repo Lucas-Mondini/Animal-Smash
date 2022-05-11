@@ -33,7 +33,7 @@ public:
 	void PlayAnimation(float playrate);
 	void PlayAnimation();
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	UAnimMontage* AnimMontage;
 protected:
 	UPROPERTY(VisibleAnywhere)
