@@ -1703,11 +1703,11 @@ TMap<FString, TArray<FTransform>> AALSBaseCharacter::CreateHandTransformMap(int 
 		FTransform transform;
 	
 		if(i.Key == "hand_l") {
-			transform.SetLocation(FVector(9, -3, -1));
+			transform.SetLocation(FVector(6, -2, -1));
 		} else {
-			transform.SetLocation(FVector(-9, 3, 1));
+			transform.SetLocation(FVector(-6, 2, 1));
 		}
-		transform.SetRotation(FRotator(0, 0, 0).Quaternion());
+		transform.SetRotation(FRotator(90, 10, 30).Quaternion());
 		transform.SetScale3D(FVector(0.3, 0.3, 0.3));
 
 		i.Value.Add(transform);
