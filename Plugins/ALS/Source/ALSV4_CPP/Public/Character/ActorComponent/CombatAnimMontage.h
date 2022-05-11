@@ -33,11 +33,11 @@ public:
 	void PlayAnimation(float playrate);
 	void PlayAnimation();
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	UAnimMontage* AnimMontage;
+protected:
 	UPROPERTY(VisibleAnywhere)
 	class AALSBaseCharacter* ActorToPlayMontage;
-protected:
 	float PlayRate;
 	TMap<FString, TArray<FTransform>> SocketNameToCollision;
 	TArray<UCapsuleComponent*> CollisionCapsuleArray;

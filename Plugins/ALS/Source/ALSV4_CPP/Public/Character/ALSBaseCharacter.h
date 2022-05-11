@@ -34,11 +34,11 @@ class ALSV4_CPP_API AALSBaseCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
-	UActorCombatComponent* CombatComponent;
 
 
 public:
+	UPROPERTY(EditAnywhere)
+	UActorCombatComponent* CombatComponent;
 	AALSBaseCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/***

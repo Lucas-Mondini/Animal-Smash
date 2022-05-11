@@ -57,9 +57,13 @@ void UCombatAnimMontage::CreateAnimCollisions() {
 
 
 void UCombatAnimMontage::DestroyAnimCollisions() {
-	for (UCapsuleComponent *c : CollisionCapsuleArray) {
-		c->DestroyComponent();
-		CollisionCapsuleArray.Remove(c);
+	try {
+		for (UCapsuleComponent *c : CollisionCapsuleArray) {
+			c->DestroyComponent();
+			CollisionCapsuleArray.Remove(c);
+		}
+	} catch (std::exception e) {
+		
 	}
 }
 

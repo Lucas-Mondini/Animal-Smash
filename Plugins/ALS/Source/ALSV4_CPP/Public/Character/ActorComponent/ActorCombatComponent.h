@@ -47,10 +47,12 @@ public:
 	float KickAnimOffsetVelocity = 0.65;
 	UPROPERTY(EditAnywhere)
 	float PunchAnimOffsetVelocity = 0.7;
-	
-	UPROPERTY(EditAnywhere, Instanced)
+
+	//both of animation arrays needs to have the tags: Instanced, Transient
+	//or it will prevent to save the uasset
+	UPROPERTY(Instanced, Transient, EditAnywhere)
 	TArray<UCombatAnimMontage*> PunchComboAnimations;
-	UPROPERTY(EditAnywhere, Instanced)
+	UPROPERTY(Instanced, Transient, EditAnywhere)
 	TArray<UCombatAnimMontage*> KickComboAnimations;
 
 	UFUNCTION(BlueprintCallable)
