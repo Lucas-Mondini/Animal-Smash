@@ -50,6 +50,7 @@ void UCombatAnimMontage::CreateAnimCollisions() {
 			capsule->RegisterComponent();
 			capsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 			capsule->OnComponentBeginOverlap.AddDynamic(this, &UCombatAnimMontage::CallCombatComponentProcessOverlapProcess);
+			capsule->SetIsReplicated(true);
 			CollisionCapsuleArray.Add(capsule);
 		}
 	}
@@ -59,15 +60,15 @@ void UCombatAnimMontage::CreateAnimCollisions() {
 void UCombatAnimMontage::DestroyAnimCollisions() {
 	try {
 		for (UCapsuleComponent *c : CollisionCapsuleArray) {
-			c->DestroyComponent();
 			CollisionCapsuleArray.Remove(c);
+			c->DestroyComponent();
 		}
 	} catch (std::exception e) {
 		
 	}
 }
 
-void UCombatAnimMontage::CallCombatComponentProcessOverlapProcess(UPrimitiveComponent* OverlappedComp,
+void UCombatAnimMontage::CallCombatComponentProcessOverlapProcess_Implementation(UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult) {
 	ActorToPlayMontage->

@@ -38,6 +38,10 @@ UActorCombatComponent::UActorCombatComponent()
 	
 }
 
+void UActorCombatComponent::ClearActorHitted_Implementation() {
+	ActorHitted.Empty();
+}
+
 void UActorCombatComponent::Attack1() {
 	if(OwnerCharacter->GetMovementState() != EALSMovementState::InAir && CanAttack) {
 		CanAttack = false;
@@ -77,7 +81,7 @@ void UActorCombatComponent::BeginPlay()
 
 void UActorCombatComponent::CombatComponentProcessOverlapProcess(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	if(Cast<AActor>(OtherActor) && !ActorHitted.Contains(OtherActor) && OtherActor != GetOwner())
+	if(OtherActor != GetOwner() && !ActorHitted.Contains(OtherActor) && Cast<AActor>(OtherActor))
 		HitProcess(OtherActor);
 }
 
@@ -111,7 +115,7 @@ void UActorCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	
 	if(AnimAccumulator > AnimTime && !CanAttack) {
 		GLog->Log("esvaziando");
-		ActorHitted.Empty();
+		ClearActorHitted();
 		State = EACCStateMachine::Default;
 		CanAttack = true;
 	}

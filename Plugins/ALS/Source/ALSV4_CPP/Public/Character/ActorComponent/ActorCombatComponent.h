@@ -21,6 +21,9 @@ public:
 	UPROPERTY()
 	TArray<AActor*> ActorHitted;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void ClearActorHitted();
+
 	UPROPERTY(VisibleAnywhere)
 	EACCStateMachine State;
 

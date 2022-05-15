@@ -24,7 +24,7 @@ public:
 	void CreateAnimCollisions();
 	void DestroyAnimCollisions();
 	
-	UFUNCTION()
+	UFUNCTION( NetMulticast, Reliable )
 	void CallCombatComponentProcessOverlapProcess(	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 													UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 													bool bFromSweep, const FHitResult& SweepResult);
